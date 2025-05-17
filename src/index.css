@@ -1,0 +1,99 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    @apply font-sans text-surface-800 dark:text-surface-100;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-heading font-semibold;
+  }
+  
+  h1 {
+    @apply text-3xl md:text-4xl lg:text-5xl;
+  }
+  
+  h2 {
+    @apply text-2xl md:text-3xl lg:text-4xl;
+  }
+  
+  h3 {
+    @apply text-xl md:text-2xl lg:text-3xl;
+  }
+  
+  body {
+    @apply min-h-screen bg-surface-50 dark:bg-surface-900 transition-colors;
+  }
+}
+
+@layer components {
+  .btn {
+    @apply px-4 py-2 rounded-lg font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2;
+  }
+  
+  .btn-primary {
+    @apply bg-primary text-white hover:bg-primary-dark focus:ring-primary;
+  }
+  
+  .btn-secondary {
+    @apply bg-secondary text-white hover:bg-secondary-dark focus:ring-secondary;
+  }
+  
+  .btn-accent {
+    @apply bg-accent text-white hover:bg-amber-600 focus:ring-accent;
+  }
+  
+  .btn-outline {
+    @apply border-2 border-surface-300 hover:bg-surface-100 dark:border-surface-700 dark:hover:bg-surface-800;
+  }
+  
+  .neu-card {
+    @apply bg-surface-100 dark:bg-surface-800 rounded-2xl p-6 transition-all duration-300;
+    @apply shadow-neu-light dark:shadow-neu-dark;
+    @apply hover:shadow-lg dark:hover:shadow-none;
+  }
+  
+  .glass-card {
+    @apply bg-white/70 dark:bg-surface-800/70 backdrop-blur-md rounded-2xl p-6;
+    @apply border border-white/20 dark:border-surface-700/50;
+    @apply shadow-soft;
+  }
+  
+  .task-card {
+    @apply bg-white dark:bg-surface-800 rounded-xl p-4 transition-all duration-200;
+    @apply border border-surface-200 dark:border-surface-700;
+    @apply hover:shadow-md dark:hover:shadow-lg dark:hover:shadow-black/20;
+  }
+  
+  .priority-urgent {
+    @apply border-l-4 border-red-500;
+  }
+  
+  .priority-high {
+    @apply border-l-4 border-orange-500;
+  }
+  
+  .priority-medium {
+    @apply border-l-4 border-yellow-500;
+  }
+  
+  .priority-low {
+    @apply border-l-4 border-green-500;
+  }
+}
+
+@layer utilities {
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* Import react-toastify CSS */
+@import 'react-toastify/dist/ReactToastify.css';
