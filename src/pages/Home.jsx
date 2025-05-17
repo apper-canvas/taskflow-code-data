@@ -9,6 +9,8 @@ const CheckCircleIcon = getIcon('CheckCircle');
 const ListTodoIcon = getIcon('Clipboard');
 const ClockIcon = getIcon('Timer');
 const UserIcon = getIcon('UserCircle');
+const HourglassIcon = getIcon('Hourglass');
+const AlarmExclamationIcon = getIcon('AlarmExclamation');
 const RepeatIcon = getIcon('Repeat');
 
 function Home() {
@@ -136,7 +138,7 @@ function Home() {
             {/* In Progress Tasks Card */}
             <motion.div variants={itemVariants} className="neu-card flex items-center space-x-4">
               <div className="p-3 bg-blue-500/10 dark:bg-blue-500/20 rounded-full">
-                <getIcon('Hourglass') className="w-6 h-6 text-blue-500" />
+                <HourglassIcon className="w-6 h-6 text-blue-500" />
               </div>
               <div>
                 <h3 className="text-lg font-medium dark:text-white">In Progress</h3>
@@ -147,7 +149,7 @@ function Home() {
             {/* Overdue Tasks Card */}
             <motion.div variants={itemVariants} className="neu-card flex items-center space-x-4">
               <div className="p-3 bg-red-500/10 dark:bg-red-500/20 rounded-full">
-                <getIcon('AlarmExclamation') className="w-6 h-6 text-red-500" />
+                <AlarmExclamationIcon className="w-6 h-6 text-red-500" />
               </div>
               <div>
                 <h3 className="text-lg font-medium dark:text-white">Overdue</h3>
