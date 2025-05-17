@@ -7,8 +7,8 @@ import Home from './pages/Home';
 import NotFound from './pages/NotFound';
 
 // Components for the theme toggle button
-const MoonIcon = getIcon('Moon');
-const SunIcon = getIcon('Sun');
+const MoonIcon = getIcon('MoonStar');
+const SunIcon = getIcon('SunMedium');
 
 function App() {
   const [darkMode, setDarkMode] = useState(() => {

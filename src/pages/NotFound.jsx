@@ -3,8 +3,8 @@ import { motion } from 'framer-motion';
 import { getIcon } from '../utils/iconUtils';
 
 // Import icons as components
-const HomeIcon = getIcon('Home');
-const AlertTriangleIcon = getIcon('AlertTriangle');
+const HomeIcon = getIcon('ArrowLeftToLine');
+const AlertTriangleIcon = getIcon('FileX');
 
 function NotFound() {
   const navigate = useNavigate();

@@ -6,9 +6,9 @@ import MainFeature from '../components/MainFeature';
 
 // Import icons as components
 const CheckCircleIcon = getIcon('CheckCircle');
-const ListTodoIcon = getIcon('ListTodo');
-const ClockIcon = getIcon('Clock');
-const UserIcon = getIcon('User');
+const ListTodoIcon = getIcon('Clipboard');
+const ClockIcon = getIcon('Timer');
+const UserIcon = getIcon('UserCircle');
 const RepeatIcon = getIcon('Repeat');
 
 function Home() {
@@ -97,7 +97,7 @@ function Home() {
                 <UserIcon className="w-5 h-5" />
                 <span className="hidden md:inline">Welcome, Guest</span>
               </button>
-            </motion.div>
+            </motion.div> 
           </div>
         </div>
       </header>
@@ -136,7 +136,7 @@ function Home() {
             {/* In Progress Tasks Card */}
             <motion.div variants={itemVariants} className="neu-card flex items-center space-x-4">
               <div className="p-3 bg-blue-500/10 dark:bg-blue-500/20 rounded-full">
-                <ClockIcon className="w-6 h-6 text-blue-500" />
+                <getIcon('Hourglass') className="w-6 h-6 text-blue-500" />
               </div>
               <div>
                 <h3 className="text-lg font-medium dark:text-white">In Progress</h3>
@@ -147,7 +147,7 @@ function Home() {
             {/* Overdue Tasks Card */}
             <motion.div variants={itemVariants} className="neu-card flex items-center space-x-4">
               <div className="p-3 bg-red-500/10 dark:bg-red-500/20 rounded-full">
-                <ClockIcon className="w-6 h-6 text-red-500" />
+                <getIcon('AlarmExclamation') className="w-6 h-6 text-red-500" />
               </div>
               <div>
                 <h3 className="text-lg font-medium dark:text-white">Overdue</h3>
