@@ -46,8 +46,9 @@ function MainFeature({ setStatsSummary }) {
       monthlyOption: 'dayOfMonth', // dayOfMonth or dayOfWeek
       monthlyDay: 1, // Day of month (1-31)
       endOption: 'never', // never, after, onDate
-      endAfter: 10, // Number of occurrences
-    }
+      endAfter: 10 // Number of occurrences
+    },
+    
     dueDate: '',
     createdAt: '',
     updatedAt: ''
@@ -273,6 +274,12 @@ function MainFeature({ setStatsSummary }) {
   const handleWeekdayToggle = (day) => {
     const weekdays = currentTask.recurrence.weekdays || [];
     const updatedWeekdays = weekdays.includes(day) ? weekdays.filter(d => d !== day) : [...weekdays, day];
+    
+    setCurrentTask({
+      ...currentTask,
+      recurrence: { ...currentTask.recurrence, weekdays: updatedWeekdays }
+    });
+  };
 
   // Get priority color class
   const getPriorityColorClass = (priority) => {
