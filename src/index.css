@@ -82,6 +82,10 @@
   .priority-low {
     @apply border-l-4 border-green-500;
   }
+  
+  .task-recurring {
+    @apply border-r-4 border-r-secondary;
+  }
 }
 
 @layer utilities {

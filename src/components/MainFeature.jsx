@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'react-toastify';
+import { format } from 'date-fns';
 import { getIcon } from '../utils/iconUtils';
+import { formatDate, getNextOccurrence } from '../utils/dateUtils';
 
-// Import icons as components
+// Import icons
 const PlusIcon = getIcon('Plus');
 const EditIcon = getIcon('Edit2');
 const TrashIcon = getIcon('Trash2');
@@ -17,6 +19,8 @@ const ArrowDownIcon = getIcon('ArrowDown');
 const ListIcon = getIcon('ListTodo');
 const CheckCircleIcon = getIcon('CheckCircle');
 const AlertCircleIcon = getIcon('AlertCircle');
+const RepeatIcon = getIcon('Repeat');
+const InfoIcon = getIcon('Info');
 
 function MainFeature({ setStatsSummary }) {
   const [tasks, setTasks] = useState(() => {
@@ -33,7 +37,17 @@ function MainFeature({ setStatsSummary }) {
     title: '',
     description: '',
     priority: 'Medium',
-    status: 'To Do',
+    updatedAt: '',
+    isRecurring: false,
+    recurrence: {
+      frequency: 'daily', // daily, weekly, monthly, custom
+      interval: 1,
+      weekdays: [], // For weekly: array of days (0-6, Sunday-Saturday)
+      monthlyOption: 'dayOfMonth', // dayOfMonth or dayOfWeek
+      monthlyDay: 1, // Day of month (1-31)
+      endOption: 'never', // never, after, onDate
+      endAfter: 10, // Number of occurrences
+    }
     dueDate: '',
     createdAt: '',
     updatedAt: ''
@@ -63,14 +77,24 @@ function MainFeature({ setStatsSummary }) {
   const handleAddNewTask = () => {
     // Reset form for a new task
     setCurrentTask({
-      id: Date.now().toString(),
+      id: `task_${Date.now()}`,
       title: '',
       description: '',
       priority: 'Medium',
       status: 'To Do',
       dueDate: new Date(Date.now() + 86400000).toISOString().slice(0, 10), // Tomorrow
       createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
+      updatedAt: new Date().toISOString(),
+      isRecurring: false,
+      recurrence: {
+        frequency: 'daily',
+        interval: 1,
+        weekdays: [],
+        monthlyOption: 'dayOfMonth',
+        monthlyDay: 1,
+        endOption: 'never',
+        endAfter: 10
+      }
     });
     setIsEditing(false);
     setShowTaskModal(true);
@@ -113,6 +137,54 @@ function MainFeature({ setStatsSummary }) {
     }));
   };
 
+  const handleCompleteRecurringTask = (taskId) => {
+    const task = tasks.find(t => t.id === taskId);
+    if (!task || !task.isRecurring) return;
+    
+    // Calculate the next occurrence
+    const nextOccurrence = getNextOccurrence(task.recurrence, task.dueDate);
+    if (!nextOccurrence) return;
+    
+    // Create a new task instance for the next occurrence
+    const newTask = {
+      ...task,
+      id: `task_${Date.now()}`,
+      status: 'To Do',
+      dueDate: nextOccurrence.toISOString().slice(0, 10),
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+    
+    // Add the new task
+    setTasks(prevTasks => [...prevTasks, newTask]);
+    
+    // Mark the current instance as completed
+    handleStatusChange(taskId, 'Completed');
+    
+    // Show toast notification
+    toast.info('Recurring task completed. Next occurrence added!');
+  };
+
+  const getNextRecurrenceDate = (task) => {
+    if (!task.isRecurring) return null;
+    
+    try {
+      const nextDate = getNextOccurrence(task.recurrence, task.dueDate);
+      return nextDate;
+    } catch (error) {
+      console.error("Error calculating next recurrence:", error);
+      return null;
+    }
+  };
+
+  const formatNextRecurrence = (task) => {
+    const nextDate = getNextRecurrenceDate(task);
+    if (!nextDate) return '';
+    
+    return format(nextDate, 'EEE, MMM d, yyyy');
+  };
+
+  // Handle saving a task (create or update)
   const handleSaveTask = (e) => {
     e.preventDefault();
     
@@ -131,7 +203,12 @@ function MainFeature({ setStatsSummary }) {
       // Update existing task
       setTasks(tasks.map(task => 
         task.id === currentTask.id 
-          ? { ...currentTask, updatedAt: new Date().toISOString() } 
+          ? { 
+              ...currentTask, 
+              updatedAt: new Date().toISOString(),
+              // Ensure weekdays is an array
+              recurrence: { ...currentTask.recurrence, weekdays: Array.isArray(currentTask.recurrence.weekdays) ? currentTask.recurrence.weekdays : [] }
+            } 
           : task
       ));
       toast.success('Task updated successfully!');
@@ -191,6 +268,11 @@ function MainFeature({ setStatsSummary }) {
   const isOverdue = (dueDate) => {
     return new Date(dueDate) < new Date() && dueDate !== '';
   };
+  
+  // Function to handle setting weekdays for weekly recurrence
+  const handleWeekdayToggle = (day) => {
+    const weekdays = currentTask.recurrence.weekdays || [];
+    const updatedWeekdays = weekdays.includes(day) ? weekdays.filter(d => d !== day) : [...weekdays, day];
 
   // Get priority color class
   const getPriorityColorClass = (priority) => {
@@ -370,7 +452,7 @@ function MainFeature({ setStatsSummary }) {
                   animate="visible"
                   exit="exit"
                   layout
-                  className={`task-card ${task.status === 'Completed' ? 'opacity-80' : ''} border-l-4 ${
+                  className={`task-card ${task.status === 'Completed' ? 'opacity-80' : ''} ${task.isRecurring ? 'task-recurring' : ''} border-l-4 ${
                     task.priority === 'Urgent' ? 'border-l-red-500' :
                     task.priority === 'High' ? 'border-l-orange-500' :
                     task.priority === 'Medium' ? 'border-l-yellow-500' :
@@ -383,8 +465,8 @@ function MainFeature({ setStatsSummary }) {
                       <div className="flex items-start space-x-3">
                         {/* Status Checkbox for quick toggle */}
                         <button 
-                          onClick={() => handleStatusChange(
-                            task.id, 
+                          onClick={() => task.isRecurring ? handleCompleteRecurringTask(task.id) : 
+                            handleStatusChange(task.id, 
                             task.status === 'Completed' ? 'To Do' : 'Completed'
                           )}
                           className={`mt-1 flex-shrink-0 w-5 h-5 rounded-full border ${
@@ -403,7 +485,10 @@ function MainFeature({ setStatsSummary }) {
                         <div className="flex-grow">
                           <h3 className={`text-lg font-medium dark:text-white ${
                             task.status === 'Completed' ? 'line-through text-surface-500 dark:text-surface-400' : ''
-                          }`}>
+                          } flex items-center gap-2`}>
+                            {task.isRecurring && (
+                              <RepeatIcon className="inline-block w-4 h-4 text-secondary" />
+                            )}
                             {task.title}
                           </h3>
                           <p className="text-surface-600 dark:text-surface-400 mt-1 text-sm">
@@ -439,6 +524,23 @@ function MainFeature({ setStatsSummary }) {
                               ) : null}
                               {new Date(task.dueDate).toLocaleDateString()}
                             </span>
+                            
+                            {/* Recurring Task Next Occurrence */}
+                            {task.isRecurring && task.status !== 'Completed' && (
+                              <div className="relative inline-flex group">
+                                <span className="inline-flex items-center text-xs text-secondary cursor-help">
+                                  <RepeatIcon className="w-3 h-3 mr-1" />
+                                  Recurring
+                                  <InfoIcon className="w-3 h-3 ml-1" />
+                                </span>
+                                <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-1 w-48 p-2 bg-white dark:bg-surface-700 rounded-md shadow-md text-xs hidden group-hover:block z-10 text-center">
+                                  <p className="font-medium text-surface-800 dark:text-white">
+                                    Next occurrence:
+                                    <span className="block mt-1 text-secondary">{formatNextRecurrence(task)}</span>
+                                  </p>
+                                </div>
+                              </div>
+                            )}
                             
                             {/* Priority */}
                             <span className="inline-flex items-center text-xs text-surface-500 dark:text-surface-400">
@@ -603,6 +705,117 @@ function MainFeature({ setStatsSummary }) {
                       <option value="Completed">Completed</option>
                     </select>
                   </div>
+                  
+                  {/* Recurring Task Toggle */}
+                  <div className="mt-6 mb-2">
+                    <div className="flex items-center">
+                      <input
+                        type="checkbox"
+                        id="isRecurring"
+                        checked={currentTask.isRecurring}
+                        onChange={(e) => setCurrentTask({
+                          ...currentTask, 
+                          isRecurring: e.target.checked
+                        })}
+                        className="w-4 h-4 text-primary focus:ring-primary border-surface-300 rounded"
+                      />
+                      <label htmlFor="isRecurring" className="ml-2 block text-sm font-medium text-surface-700 dark:text-surface-300">
+                        Recurring Task
+                      </label>
+                    </div>
+                    <p className="text-xs text-surface-500 dark:text-surface-400 mt-1">
+                      Schedule this task to repeat automatically
+                    </p>
+                  </div>
+                  
+                  {/* Recurring Task Options - Only show if recurring is checked */}
+                  {currentTask.isRecurring && (
+                    <div className="space-y-4 p-4 bg-surface-50 dark:bg-surface-700/50 rounded-lg mt-2">
+                      <h4 className="font-medium text-surface-800 dark:text-white flex items-center">
+                        <RepeatIcon className="w-4 h-4 mr-2" />
+                        Recurrence Pattern
+                      </h4>
+                      
+                      {/* Frequency Selection */}
+                      <div>
+                        <label htmlFor="recurrenceFrequency" className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-1">
+                          Repeat
+                        </label>
+                        <select
+                          id="recurrenceFrequency"
+                          value={currentTask.recurrence.frequency}
+                          onChange={(e) => setCurrentTask({
+                            ...currentTask, 
+                            recurrence: { 
+                              ...currentTask.recurrence, 
+                              frequency: e.target.value 
+                            }
+                          })}
+                          className="w-full px-3 py-1.5 border border-surface-300 dark:border-surface-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary bg-white dark:bg-surface-800 dark:text-white text-sm"
+                        >
+                          <option value="daily">Daily</option>
+                          <option value="weekly">Weekly</option>
+                          <option value="monthly">Monthly</option>
+                          <option value="custom">Custom</option>
+                        </select>
+                      </div>
+                      
+                      {/* Interval Input */}
+                      <div className="flex items-center space-x-2">
+                        <label htmlFor="recurrenceInterval" className="block text-sm font-medium text-surface-700 dark:text-surface-300 whitespace-nowrap">
+                          Every
+                        </label>
+                        <input
+                          type="number"
+                          id="recurrenceInterval"
+                          min="1"
+                          max="100"
+                          value={currentTask.recurrence.interval}
+                          onChange={(e) => setCurrentTask({
+                            ...currentTask, 
+                            recurrence: { 
+                              ...currentTask.recurrence, 
+                              interval: Math.max(1, parseInt(e.target.value) || 1)
+                            }
+                          })}
+                          className="w-16 px-2 py-1 border border-surface-300 dark:border-surface-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary bg-white dark:bg-surface-800 dark:text-white text-sm"
+                        />
+                        <span className="text-sm text-surface-700 dark:text-surface-300">
+                          {currentTask.recurrence.frequency === 'daily' ? 'day(s)' :
+                           currentTask.recurrence.frequency === 'weekly' ? 'week(s)' :
+                           currentTask.recurrence.frequency === 'monthly' ? 'month(s)' : 'day(s)'}
+                        </span>
+                      </div>
+                      
+                      {/* Weekly Options - Day Selection */}
+                      {currentTask.recurrence.frequency === 'weekly' && (
+                        <div>
+                          <label className="block text-sm font-medium text-surface-700 dark:text-surface-300 mb-1">
+                            Repeat on
+                          </label>
+                          <div className="flex flex-wrap gap-1">
+                            {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day, index) => (
+                              <button
+                                key={index}
+                                type="button"
+                                onClick={() => {
+                                  const weekdays = currentTask.recurrence.weekdays || [];
+                                  const updatedWeekdays = weekdays.includes(index) 
+                                    ? weekdays.filter(d => d !== index) 
+                                    : [...weekdays, index];
+                                  setCurrentTask({
+                                    ...currentTask, 
+                                    recurrence: { ...currentTask.recurrence, weekdays: updatedWeekdays }
+                                  });
+                                }}
+                                className={`w-8 h-8 rounded-full text-xs font-medium ${currentTask.recurrence.weekdays?.includes(index) ? 'bg-secondary text-white' : 'bg-surface-200 dark:bg-surface-600 text-surface-700 dark:text-surface-300'}`}
+                              >{day}</button>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
                 
                 {/* Modal Footer - Actions */}

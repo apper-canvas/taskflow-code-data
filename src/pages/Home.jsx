@@ -9,6 +9,7 @@ const CheckCircleIcon = getIcon('CheckCircle');
 const ListTodoIcon = getIcon('ListTodo');
 const ClockIcon = getIcon('Clock');
 const UserIcon = getIcon('User');
+const RepeatIcon = getIcon('Repeat');
 
 function Home() {
   const [statsSummary, setStatsSummary] = useState({
