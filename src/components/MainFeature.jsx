@@ -21,6 +21,10 @@ const CheckCircleIcon = getIcon('CheckCircle');
 const AlertCircleIcon = getIcon('AlertOctagon');
 const RepeatIcon = getIcon('RotateCcw');
 const InfoIcon = getIcon('HelpCircle');
+const HourglassIcon = getIcon('Hourglass');
+const AlarmIcon = getIcon('Alarm');
+const FlagIconSmall = getIcon('Flag');
+const RefreshCwIcon = getIcon('RefreshCw');
 
 function MainFeature({ setStatsSummary }) {
   const [tasks, setTasks] = useState(() => {
@@ -509,7 +513,7 @@ function MainFeature({ setStatsSummary }) {
                               {task.status === 'Completed' ? (
                                 <CheckCircleIcon className="w-3 h-3 mr-1" />
                               ) : task.status === 'In Progress' ? (
-                                <getIcon('Hourglass') className="w-3 h-3 mr-1" />
+                                <HourglassIcon className="w-3 h-3 mr-1" />
                               ) : (
                                 <ListIcon className="w-3 h-3 mr-1" />
                               )}
@@ -525,7 +529,7 @@ function MainFeature({ setStatsSummary }) {
                               <CalendarIcon className="w-3 h-3 mr-1" />
                               {isOverdue(task.dueDate) && task.status !== 'Completed' ? (
                                 <span className="flex items-center">
-                                  <getIcon('Alarm') className="w-3 h-3 mr-1 text-red-600 dark:text-red-400" />
+                                  <AlarmIcon className="w-3 h-3 mr-1 text-red-600 dark:text-red-400" />
                                   Overdue:
                                 </span>
                               ) : null}
@@ -536,7 +540,7 @@ function MainFeature({ setStatsSummary }) {
                             {task.isRecurring && task.status !== 'Completed' && (
                               <div className="relative inline-flex group">
                                 <span className="inline-flex items-center text-xs text-secondary cursor-help">
-                                  <getIcon('Repeat') className="w-3 h-3 mr-1" />
+                                  <RepeatIcon className="w-3 h-3 mr-1" />
                                   Recurring
                                   <InfoIcon className="w-3 h-3 ml-1" />
                                 </span>
@@ -551,7 +555,7 @@ function MainFeature({ setStatsSummary }) {
                             
                             {/* Priority */}
                             <span className="inline-flex items-center text-xs text-surface-500 dark:text-surface-400">
-                              <getIcon('Flag') className="w-3 h-3 mr-1" />
+                              <FlagIconSmall className="w-3 h-3 mr-1" />
                               <span className="flex items-center">
                                 <span className={`inline-block w-2 h-2 rounded-full mr-1 ${getPriorityColorClass(task.priority)}`}></span> 
                                 {task.priority}
@@ -739,7 +743,7 @@ function MainFeature({ setStatsSummary }) {
                   {currentTask.isRecurring && (
                     <div className="space-y-4 p-4 bg-surface-50 dark:bg-surface-700/50 rounded-lg mt-2">
                       <h4 className="font-medium text-surface-800 dark:text-white flex items-center">
-                        <getIcon('RefreshCw') className="w-4 h-4 mr-2" />
+                        <RefreshCwIcon className="w-4 h-4 mr-2" />
                         Recurrence Pattern
                       </h4>
                       
